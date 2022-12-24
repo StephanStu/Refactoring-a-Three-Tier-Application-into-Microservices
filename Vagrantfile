@@ -33,11 +33,25 @@ Vagrant.configure("2") do |config|
       sudo zypper --non-interactive install bzip2
       sudo zypper --non-interactive install etcd
       sudo zypper --non-interactive install apparmor-parser
-      curl -sfL https://get.k3s.io | sh -
+      sudo zypper --non-interactive install git-core
+      sudo zypper --non-interactive install vim
+      echo "## Bootstrapping the Kubernetes Cluster now"
+      sleep 5s
+      sudo curl -sfL https://get.k3s.io | sh -
+      sleep 5s
+      echo "## Installing Helm now"
+      sleep 5s
+      sudo curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get-helm-3 > get_helm.sh
+      sudo chmod 700 get_helm.sh
+      sudo ./get_helm.sh
+      helm version
+      echo "## Deploying Zookeeper-Kafka now using Helm"
+      sleep 30s
+      sudo helm repo add bitnami https://charts.bitnami.com/bitnami
+      sudo helm repo update
+      sudo helm install kafkacluster bitnami/kafka   --set volumePermissions.enabled=true   --set zookeeper.volumePermissions.enabled=true --kubeconfig /etc/rancher/k3s/k3s.yaml
     SHELL
   end
-
-
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
   # `vagrant box outdated`. This is not recommended.
