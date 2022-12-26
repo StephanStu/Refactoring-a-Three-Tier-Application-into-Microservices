@@ -1,7 +1,7 @@
 # UdaConnect-Refactored-into-Microservices
-UdaConnect is Project #2 of Udacity's Cloud Native Application Architecture Nanodegree. This is my solution to this project.
+UdaConnect is Project #2 of Udacity's Cloud Native Application Architecture Nanodegree. This is my solution for this project.
 
-## Technologies
+## Dependencies
 These technologies are used in this project:
 * [Flask](https://flask.palletsprojects.com/en/1.1.x/) - API webserver
 * [SQLAlchemy](https://www.sqlalchemy.org/) - Database ORM
@@ -10,8 +10,9 @@ These technologies are used in this project:
 * [Vagrant](https://www.vagrantup.com/) - Tool for managing virtual deployed environments
 * [VirtualBox](https://www.virtualbox.org/) - Hypervisor allowing you to run multiple operating systems
 * [K3s](https://k3s.io/) - Lightweight distribution of K8s to easily develop against a local cluster
+* [Helm](https://helm.sh/docs/intro/install/) - A package manager for Kubernetes
 
-## Prerequisites, Dependencies for Running Locally
+## Prerequisites for Running Locally
 These tools are necessary for getting a (local, virtual) environment set up properly.
 1. [Install Docker](https://docs.docker.com/get-docker/)
 2. [Set up a DockerHub account](https://hub.docker.com/)
@@ -19,7 +20,7 @@ These tools are necessary for getting a (local, virtual) environment set up prop
 4. [Install VirtualBox](https://www.virtualbox.org/wiki/Downloads) with at least version 6.0
 5. [Install Vagrant](https://www.vagrantup.com/docs/installation) with at least version 2.0
 
-## Deployment
+## Deployment: Environment Setup
 To run the application, you will need a K8s cluster running locally and to interface with it via `kubectl`. In this project Vagrant with VirtualBox is used to run K3s.
 
 ### Initialize K3s
@@ -29,7 +30,13 @@ $ vagrant up
 ```
 The command will take a while and will leverage VirtualBox to load an [openSUSE](https://www.opensuse.org/) OS and automatically install [K3s](https://k3s.io/). When we are taking a break from development, we can run `vagrant suspend` to conserve some ouf our system's resources and `vagrant resume` when we want to bring our resources back up. Some useful vagrant commands can be found in [this cheatsheet](https://gist.github.com/wpscholar/a49594e2e2b918f4d0c4).
 
-#### Set up `kubectl`
+### Deploy Helm
+
+### Deploy Zookeeper and Kafka
+
+### Deploy Utilities: Vim, Git
+
+#### Set up `kubectl` to Interact with the Cluster
 After `vagrant up` is done, you will SSH into the Vagrant environment and retrieve the Kubernetes config file used by `kubectl`. We want to copy the contents of this file into our local environment so that `kubectl` knows how to communicate with the K3s cluster.
 ```bash
 $ vagrant ssh
@@ -64,6 +71,8 @@ Type `exit` to exit the virtual OS and you will find yourself back in your compu
 
 Afterwards, you can test that `kubectl` works by running a command like `kubectl describe services`. It should not return any errors.
 
+## Deployment: Application Deployment
+
 ### Steps
 1. `kubectl apply -f deployment/db-configmap.yaml` - Set up environment variables for the pods
 2. `kubectl apply -f deployment/db-secret.yaml` - Set up secrets for the pods
@@ -90,3 +99,57 @@ These pages should also load on your web browser:
 You may notice the odd port numbers being served to `localhost`. [By default, Kubernetes services are only exposed to one another in an internal network](https://kubernetes.io/docs/concepts/services-networking/service/). This means that `udaconnect-app` and `udaconnect-api` can talk to one another. For us to connect to the cluster as an "outsider", we need to a way to expose these services to `localhost`.
 
 Connections to the Kubernetes services have been set up through a [NodePort](https://kubernetes.io/docs/concepts/services-networking/service/#nodeport). (While we would use a technology like an [Ingress Controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/) to expose our Kubernetes services in deployment, a NodePort will suffice for development.)
+
+#### Useful Commands
+This section list some commands that showed to be worth keeping in mind.
+* ssh into a pod that is in a namespace
+
+```bash
+$ kubectl exec -it [pod-name] -n [namespace-name] -- /bin/bash
+```
+
+* Export the kube-config to where it is expected to avoid [this](https://github.com/k3s-io/k3s/issues/1126) error.
+
+```bash
+$ kubectl config view --raw >~/.kube/config
+```
+
+* A simple Kafka-Client that you can use for testing
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kafka-client
+spec:
+  containers:
+  - name: kafka-client
+    image: docker.io/bitnami/kafka:2.8.0-debian-10-r43
+    # Just sleep forever
+    command: [ "sleep" ]
+    args: [ "infinity" ]
+```
+
+Create this as *kafka-client.yaml* and then
+
+```bash
+$ kubectl apply -f kafka-client.yaml
+```
+
+Wait until all pods have reached the state RUNNING, then
+
+```bash
+$ kubectl exec --tty -i kafka-client --namespace default -- bash
+```
+
+Once on the client create a topic and post some stuff by
+
+```bash
+kafka-console-producer.sh --broker-list kafkacluster-0.kafkacluster-headless.default.svc.cluster.local:9092 --topic test
+```
+
+Consume your stuff by
+
+```bash
+kafka-console-consumer.sh --bootstrap-server kafkacluster.default.svc.cluster.local:9092 --topic test --from-beginning
+```
