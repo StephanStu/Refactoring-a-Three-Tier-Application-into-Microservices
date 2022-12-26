@@ -5,6 +5,12 @@ import os, logging, sys, json
 from concurrent import futures
 from kafka import KafkaProducer
 
+broker = os.environ["KAFKA_URL"]
+logging.info("connecting to broker at " + broker)
+topic = os.environ["KAFKA_TOPIC"]
+logging.info("using the topic " + topic)
+producer = KafkaProducer(bootstrap_servers=broker)
+
 def create_logging_handlers():
     # set logger to handle STDOUT and STDERR
     stdout_handler =  logging.StreamHandler(stream=sys.stdout) # stdout handler `
@@ -22,8 +28,12 @@ class LocationServicer(location_pb2_grpc.LocationServiceServicer):
             'longitude': int(request.longitude)
         }
         logging.info("processing request with payload " + json.dumps(request_payload))
-        user_encode_data = json.dumps(request_payload, indent=2).encode('utf-8')
-        #producer.send(kafka_topic, user_encode_data)
+        encoded_data = json.dumps(request_payload, indent=2).encode('utf-8')
+        try:
+            producer.send(topic, encoded_data)
+        except:
+            logging.error("failed to push payload into the message queue.")
+
         return location_pb2.Location(**request_payload)
 
 format_output = '%(levelname)s:%(name)s:%(asctime)s, %(message)s'
