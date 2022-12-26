@@ -24,9 +24,10 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@v3
+        working-directory: ./modules/locationfeeder
         with:
           context: .
-          file: ./modules/locationfeeder/Dockerfile
+          file: ./Dockerfile
           platforms: linux/amd64
           push: true
           tags: stephanstu/locationfeeder:latest
