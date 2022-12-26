@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: ConfigMap
+data:
+  KAFKA_URL: kafka-release-0.kafka-release-headless.default.svc.cluster.local:9092
+  KAFKA_TOPIC: location
+metadata:
+  name: config-location-event-map
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: locationfeeder
+  name: locationfeeder-svc
+spec:
+  ports:
+  - name: "5001"
+    port: 5001
+    targetPort: 5001
+    nodePort: 30001
+  selector:
+    service: locationfeeder
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    service: locationfeeder
+  name: locationfeeder
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: locationfeeder
+  template:
+    metadata:
+      labels:
+        service: locationfeeder
+    spec:
+      containers:
+      - image: stephanstu/locationfeeder:latest
+        name: locationfeeder-container
+        imagePullPolicy: Always
+        env:
+        - name: KAFKA_URL
+          valueFrom:
+            configMapKeyRef:
+              name: config-location-event-map
+              key: KAFKA_URL
+        - name: KAFKA_TOPIC
+          valueFrom:
+            configMapKeyRef:
+              name: config-location-event-map
+              key: KAFKA_TOPIC
+        - name: PYTHONUNBUFFERED
+          value: '0'
+      restartPolicy: Always
