@@ -26,7 +26,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: ./modules/locationfeeder
-          file: ./Dockerfile
+          file: ./modules/locationfeeder/Dockerfile
           platforms: linux/amd64
           push: true
           tags: stephanstu/locationfeeder:latest
