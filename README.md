@@ -73,6 +73,12 @@ Afterwards, you can test that `kubectl` works by running a command like `kubectl
 
 ## Deployment: Application Deployment
 
+## Architecture Overview
+
+## The Service "locationfeeder"
+The state of this container is 
+[![locationfeeder - build and push to DockerHub](https://github.com/StephanStu/UdaConnect-Refactored-into-Microservices/actions/workflows/build_and_push_locationfeeder.yaml/badge.svg)](https://github.com/StephanStu/UdaConnect-Refactored-into-Microservices/actions/workflows/build_and_push_locationfeeder.yaml)
+
 ### Steps
 1. `kubectl apply -f deployment/db-configmap.yaml` - Set up environment variables for the pods
 2. `kubectl apply -f deployment/db-secret.yaml` - Set up secrets for the pods
