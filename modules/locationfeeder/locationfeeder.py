@@ -5,7 +5,7 @@ import os, logging, sys, json
 from concurrent import futures
 from kafka import KafkaProducer
 
-broker = os.environ["KAFKA_URL"]
+broker = os.environ["KAFKA_PRODUCER_URL"]
 logging.info("connecting to broker at " + broker)
 topic = os.environ["KAFKA_TOPIC"]
 logging.info("using the topic " + topic)
@@ -14,9 +14,9 @@ producer = KafkaProducer(bootstrap_servers=broker)
 def create_logging_handlers():
     # set logger to handle STDOUT and STDERR
     stdout_handler =  logging.StreamHandler(stream=sys.stdout) # stdout handler `
-    #stderr_handler =  logging.StreamHandler(stream=sys.stderr) # stderr handler
+    stderr_handler =  logging.StreamHandler(stream=sys.stderr) # stderr handler
     file_handler = logging.FileHandler(filename='locationfeeder.log')
-    handlers = [stdout_handler, file_handler]
+    handlers = [stderr_handler, stdout_handler, file_handler]
     return handlers
 
 class LocationServicer(location_pb2_grpc.LocationServiceServicer):
@@ -38,9 +38,9 @@ class LocationServicer(location_pb2_grpc.LocationServiceServicer):
 
 format_output = '%(levelname)s:%(name)s:%(asctime)s, %(message)s'
 logging.basicConfig(format=format_output, level=logging.DEBUG, handlers=create_logging_handlers())
+logging.info('locationfeeder is listening on port 5001')
 server = grpc.server(futures.ThreadPoolExecutor(max_workers=1))
 location_pb2_grpc.add_LocationServiceServicer_to_server(LocationServicer(), server)
-logging.info('locationfeeder is listening on port 5001')
 server.add_insecure_port('[::]:5001')
 server.start()
 server.wait_for_termination()

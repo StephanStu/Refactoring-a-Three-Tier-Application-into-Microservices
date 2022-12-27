@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: ConfigMap
 data:
-  KAFKA_URL: kafkacluster-0.kafkacluster-headless.default.svc.cluster.local:9092
+  KAFKA_PRODUCER_URL: kafkacluster-0.kafkacluster-headless.default.svc.cluster.local:9092
   KAFKA_TOPIC: location
 metadata:
-  name: config-location-event-map
+  name: locationfeeder-cfg
 ---
 apiVersion: v1
 kind: Service
@@ -43,16 +43,14 @@ spec:
         name: locationfeeder-container
         imagePullPolicy: Always
         env:
-        - name: KAFKA_URL
+        - name: KAFKA_PRODUCER_URL
           valueFrom:
             configMapKeyRef:
-              name: config-location-event-map
-              key: KAFKA_URL
+              name: locationfeeder-cfg
+              key: KAFKA_PRODUCER_URL
         - name: KAFKA_TOPIC
           valueFrom:
             configMapKeyRef:
-              name: config-location-event-map
+              name: locationfeeder-cfg
               key: KAFKA_TOPIC
-        - name: PYTHONUNBUFFERED
-          value: '0'
       restartPolicy: Always
