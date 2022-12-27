@@ -1,4 +1,4 @@
-name: locationfeeder - build and push to DockerHub
+name: frontend - build and push to DockerHub
 
 on:
   push:
