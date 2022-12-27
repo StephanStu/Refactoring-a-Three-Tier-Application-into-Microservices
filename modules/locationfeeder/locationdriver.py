@@ -8,7 +8,7 @@ import location_pb2_grpc
 print("Coordinates sending...")
 
 # Works with the deployed VM
-channel = grpc.insecure_channel("127.0.0.1:30001")
+channel = grpc.insecure_channel("127.0.0.1:30011")
 stub = location_pb2_grpc.LocationServiceStub(channel)
 
 # Update this with desired payload
