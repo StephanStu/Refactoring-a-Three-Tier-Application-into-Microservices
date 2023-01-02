@@ -6,7 +6,6 @@ WORKDIR /usr/src/locationfeeder
 COPY ./ ./
 # command(s) to install dependencies
 RUN pip install -r requirements.txt
-RUN python -m grpc_tools.protoc -I./ --python_out=./ --grpc_python_out=./ location.proto
 # command to expose port 5001
 EXPOSE 5001
 # command to run on container start
