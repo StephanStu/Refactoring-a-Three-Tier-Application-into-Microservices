@@ -1,3 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+data:
+  DB_USERNAME: "ct_admin"
+  DB_NAME: "geoconnections"
+  DB_HOST: "postgres"
+  DB_PORT: "5432"
+metadata:
+  name: db-env
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-secret
+type: Opaque
+data:
+  DB_PASSWORD: d293aW1zb3NlY3VyZQ==
+---
 kind: PersistentVolume
 apiVersion: v1
 metadata:
