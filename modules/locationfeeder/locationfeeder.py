@@ -1,5 +1,5 @@
 from flask import Flask, request
-import logging, sys, json
+import os, logging, sys, json
 from kafka import KafkaProducer
 
 # Function to generate handlers for logging
@@ -7,7 +7,7 @@ def create_logging_handlers():
     # set logger to handle STDOUT and STDERR
     stdout_handler =  logging.StreamHandler(stream=sys.stdout) # stdout handler `
     stderr_handler =  logging.StreamHandler(stream=sys.stderr) # stderr handler
-    file_handler = logging.FileHandler(filename='app.log')
+    file_handler = logging.FileHandler(filename='locationfeeder.log')
     handlers = [stderr_handler, stdout_handler, file_handler]
     return handlers
 
@@ -49,10 +49,13 @@ if __name__ == "__main__":
     format_output = '%(levelname)s:%(name)s:%(asctime)s, %(message)s'
     logging.basicConfig(format=format_output, level=logging.DEBUG, handlers=create_logging_handlers())
     logging.info("locationposter is listening on port 5001.")
-    broker = os.environ["KAFKA_PRODUCER_URL"]
-    logging.info("connecting to broker at " + broker)
-    topic = os.environ["KAFKA_TOPIC"]
-    logging.info("using the topic " + topic)
-    producer = KafkaProducer(bootstrap_servers=broker)
+    try:
+        broker = os.environ["KAFKA_PRODUCER_URL"]
+        logging.info("connecting to broker at " + broker)
+        topic = os.environ["KAFKA_TOPIC"]
+        logging.info("using the topic " + topic)
+        producer = KafkaProducer(bootstrap_servers=broker)
+    except:
+        logging.error("unable to connect to Kafka.")
     # Starts the application on host:port
     app.run(host='0.0.0.0', port='5001')
