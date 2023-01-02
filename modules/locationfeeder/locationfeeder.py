@@ -15,7 +15,9 @@ app = Flask(__name__)
 # Route for posting requests and getting a default request
 @app.route("/", methods=['GET', 'POST'])
 def post_location():
-    global producer
+    broker = os.environ["KAFKA_PRODUCER_URL"]
+    topic = os.environ["KAFKA_TOPIC"]
+    producer = KafkaProducer(bootstrap_servers=broker)
     if request.method == 'POST':
         payload = request.json
         userId = payload['userId']
@@ -54,7 +56,6 @@ if __name__ == "__main__":
         logging.info("connecting to broker at " + broker)
         topic = os.environ["KAFKA_TOPIC"]
         logging.info("using the topic " + topic)
-        producer = KafkaProducer(bootstrap_servers=broker)
     except:
         logging.error("unable to connect to Kafka.")
     # Starts the application on host:port
