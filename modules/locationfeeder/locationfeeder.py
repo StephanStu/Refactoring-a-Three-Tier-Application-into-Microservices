@@ -2,6 +2,15 @@ from flask import Flask, request
 import os, logging, sys, json
 from kafka import KafkaProducer
 
+try:
+    broker = os.environ["KAFKA_PRODUCER_URL"]
+    logging.info("connecting to broker at " + broker)
+    topic = os.environ["KAFKA_TOPIC"]
+    logging.info("using the topic " + topic)
+    producer = KafkaProducer(bootstrap_servers=broker)
+except:
+    logging.error("unable to connect to Kafka.")
+    
 # Function to generate handlers for logging
 def create_logging_handlers():
     # set logger to handle STDOUT and STDERR
@@ -15,9 +24,7 @@ app = Flask(__name__)
 # Route for posting requests and getting a default request
 @app.route("/", methods=['GET', 'POST'])
 def post_location():
-    broker = os.environ["KAFKA_PRODUCER_URL"]
-    topic = os.environ["KAFKA_TOPIC"]
-    producer = KafkaProducer(bootstrap_servers=broker)
+    global producer
     if request.method == 'POST':
         payload = request.json
         userId = payload['userId']
@@ -51,12 +58,5 @@ if __name__ == "__main__":
     format_output = '%(levelname)s:%(name)s:%(asctime)s, %(message)s'
     logging.basicConfig(format=format_output, level=logging.DEBUG, handlers=create_logging_handlers())
     logging.info("locationposter is listening on port 5001.")
-    try:
-        broker = os.environ["KAFKA_PRODUCER_URL"]
-        logging.info("connecting to broker at " + broker)
-        topic = os.environ["KAFKA_TOPIC"]
-        logging.info("using the topic " + topic)
-    except:
-        logging.error("unable to connect to Kafka.")
     # Starts the application on host:port
     app.run(host='0.0.0.0', port='5001')
