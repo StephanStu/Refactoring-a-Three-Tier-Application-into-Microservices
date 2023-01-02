@@ -50,6 +50,7 @@ Vagrant.configure("2") do |config|
       sudo helm repo add bitnami https://charts.bitnami.com/bitnami
       sudo helm repo update
       sudo helm install kafkacluster bitnami/kafka   --set volumePermissions.enabled=true   --set zookeeper.volumePermissions.enabled=true --kubeconfig /etc/rancher/k3s/k3s.yaml
+      sleep 300s
       echo "## Cloning the Repository"
       git clone https://github.com/StephanStu/UdaConnect-Refactored-into-Microservices.git
       sleep 30s
