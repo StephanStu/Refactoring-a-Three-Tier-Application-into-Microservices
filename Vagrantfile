@@ -54,9 +54,15 @@ Vagrant.configure("2") do |config|
       echo "## Cloning the Repository"
       git clone https://github.com/StephanStu/UdaConnect-Refactored-into-Microservices.git
       sleep 30s
-      echo "## Deploying the Application UdaConnect now (1/5): locationfeeder"
+      echo "## Deploying the Application UdaConnect now (1/5): database"
+      kubectl apply -f ./UdaConnect-Refactored-into-Microservices/modules/database/database.yaml
+      sleep 60s
+      echo "## Deploying the Application UdaConnect now (2/5): locationfeeder"
       kubectl apply -f ./UdaConnect-Refactored-into-Microservices/modules/locationfeeder/locationfeeder.yaml
-      sleep 30s
+      sleep 60s
+      echo "## Deploying the Application UdaConnect now (3/5): locationingester"
+      kubectl apply -f ./UdaConnect-Refactored-into-Microservices/modules/locationingester/locationingester.yaml
+      sleep 60s
     SHELL
   end
   # Disable automatic box update checking. If you disable this, then
