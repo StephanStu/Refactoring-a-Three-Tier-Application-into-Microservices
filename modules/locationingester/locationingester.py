@@ -1,6 +1,6 @@
 from kafka import KafkaConsumer
 from sqlalchemy import create_engine
-import os, json
+import os, json, logging
 
 KAFKA_URL = os.environ["KAFKA_CONSUMER_URL"]
 KAFKA_TOPIC = os.environ["KAFKA_TOPIC"]
