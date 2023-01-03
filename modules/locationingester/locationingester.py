@@ -19,7 +19,7 @@ def create_logging_handlers():
     handlers = [stderr_handler, stdout_handler, file_handler]
     return handlers
 
-consumer = KafkaConsumer(TOPIC_NAME, bootstrap_servers=[KAFKA_URL])
+consumer = KafkaConsumer(KAFKA_TOPIC, bootstrap_servers=[KAFKA_URL])
 format_output = '%(levelname)s:%(name)s:%(asctime)s, %(message)s'
 logging.basicConfig(format=format_output, level=logging.DEBUG, handlers=create_logging_handlers())
 logging.info("locationingester is consuming topic {} from {}.".format(KAFKA_TOPIC,KAFKA_CONSUMER_URL))
