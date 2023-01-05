@@ -12,8 +12,7 @@ DB_PORT = os.environ["DB_PORT"]
 DB_NAME = os.environ["DB_NAME"]
 
 # Get SQLalchemy engine using credentials.
-def get_database(user, passwd, host, port, db):
-    url = 'postgresql://{user}:{passwd}@{host}:{port}/{db}'.format(user=DB_USERNAME, passwd=DB_PASSWORD, host=DB_HOST, port=DB_PORT, db=DB_NAME)
+def get_database(url):
     if not database_exists(url):
         logging.error("database does not exist or database is not reachable from locationingester.")
 
@@ -33,7 +32,9 @@ consumer = KafkaConsumer(KAFKA_TOPIC, bootstrap_servers=[KAFKA_CONSUMER_URL])
 format_output = '%(levelname)s:%(name)s:%(asctime)s, %(message)s'
 logging.basicConfig(format=format_output, level=logging.DEBUG, handlers=create_logging_handlers())
 logging.info("locationingester is consuming topic {} from {}.".format(KAFKA_TOPIC, KAFKA_CONSUMER_URL))
-
+url = 'postgresql://{user}:{passwd}@{host}:{port}/{db}'.format(user=DB_USERNAME, passwd=DB_PASSWORD, host=DB_HOST, port=DB_PORT, db=DB_NAME)
+database = get_database(url)
+logging.info("connected to database {}".format(url))
 for location in consumer:
     logging.info("received {}".format(location.value.decode('utf-8')))
     with database.connect() as connection:
