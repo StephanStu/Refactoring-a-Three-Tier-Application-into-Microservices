@@ -1,14 +1,24 @@
 from kafka import KafkaConsumer
 from sqlalchemy import create_engine
+from sqlalchemy_utils import database_exists
 import os, sys, json, logging
 
-KAFKA_URL = os.environ["KAFKA_CONSUMER_URL"]
+KAFKA_CONSUMER_URL = os.environ["KAFKA_CONSUMER_URL"]
 KAFKA_TOPIC = os.environ["KAFKA_TOPIC"]
 DB_USERNAME = os.environ["DB_USERNAME"]
 DB_PASSWORD = os.environ["DB_PASSWORD"]
 DB_HOST = os.environ["DB_HOST"]
 DB_PORT = os.environ["DB_PORT"]
 DB_NAME = os.environ["DB_NAME"]
+
+# Get SQLalchemy engine using credentials.
+def get_engine(user, passwd, host, port, db):
+    url = 'postgresql://{user}:{passwd}@{host}:{port}/{db}'.format(user=DB_USERNAME, passwd=DB_PASSWORD, host=DB_HOST, port=DB_PORT, db=DB_NAME)
+    if not database_exists(url):
+        logging.error("database does not exist or database is not reachable from locationingester.")
+
+    engine = create_engine(url, pool_size=50, echo=True)
+    return engine
 
 # Function to generate handlers for logging
 def create_logging_handlers():
@@ -19,10 +29,10 @@ def create_logging_handlers():
     handlers = [stderr_handler, stdout_handler, file_handler]
     return handlers
 
-consumer = KafkaConsumer(KAFKA_TOPIC, bootstrap_servers=[KAFKA_URL])
+consumer = KafkaConsumer(KAFKA_TOPIC, bootstrap_servers=[KAFKA_CONSUMER_URL])
 format_output = '%(levelname)s:%(name)s:%(asctime)s, %(message)s'
 logging.basicConfig(format=format_output, level=logging.DEBUG, handlers=create_logging_handlers())
-logging.info("locationingester is consuming topic {} from {}.".format(KAFKA_TOPIC,KAFKA_CONSUMER_URL))
+logging.info("locationingester is consuming topic {} from {}.".format(KAFKA_TOPIC, KAFKA_CONSUMER_URL))
 
 for location in consumer:
     logging.info("received {}".format(location.value.decode('utf-8')))
