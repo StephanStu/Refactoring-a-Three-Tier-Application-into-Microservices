@@ -12,13 +12,13 @@ DB_PORT = os.environ["DB_PORT"]
 DB_NAME = os.environ["DB_NAME"]
 
 # Get SQLalchemy engine using credentials.
-def get_engine(user, passwd, host, port, db):
+def get_database(user, passwd, host, port, db):
     url = 'postgresql://{user}:{passwd}@{host}:{port}/{db}'.format(user=DB_USERNAME, passwd=DB_PASSWORD, host=DB_HOST, port=DB_PORT, db=DB_NAME)
     if not database_exists(url):
         logging.error("database does not exist or database is not reachable from locationingester.")
 
-    engine = create_engine(url, pool_size=50, echo=True)
-    return engine
+    database = create_engine(url, pool_size=50, echo=True)
+    return database
 
 # Function to generate handlers for logging
 def create_logging_handlers():
@@ -36,3 +36,12 @@ logging.info("locationingester is consuming topic {} from {}.".format(KAFKA_TOPI
 
 for location in consumer:
     logging.info("received {}".format(location.value.decode('utf-8')))
+    with database.connect() as connection:
+        payload = json.loads(location.value.decode('utf-8'))
+        userId = payload["userId"]
+        latitude = payload["latitude"]
+        longitude = payload["longitude"]
+        # inpsired by https://www.compose.com/articles/using-postgresql-through-sqlalchemy/
+        insert_statement = "INSERT INTO location (userId, coordinate) VALUES ({}, ST_Point({}, {}))" \
+        .format(userId, latitude, longitude)
+        connection.execute(insert_statement)
