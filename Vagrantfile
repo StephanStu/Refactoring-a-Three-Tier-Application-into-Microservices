@@ -50,19 +50,19 @@ Vagrant.configure("2") do |config|
       sudo helm repo add bitnami https://charts.bitnami.com/bitnami
       sudo helm repo update
       sudo helm install kafkacluster bitnami/kafka   --set volumePermissions.enabled=true   --set zookeeper.volumePermissions.enabled=true --kubeconfig /etc/rancher/k3s/k3s.yaml
-      sleep 300s
+      sleep 180s
       echo "## Cloning the Repository"
       git clone https://github.com/StephanStu/UdaConnect-Refactored-into-Microservices.git
       sleep 30s
       echo "## Deploying the Application UdaConnect now (1/5): database"
       kubectl apply -f ./UdaConnect-Refactored-into-Microservices/modules/database/database.yaml
-      sleep 60s
+      sleep 30s
       echo "## Deploying the Application UdaConnect now (2/5): locationfeeder"
       kubectl apply -f ./UdaConnect-Refactored-into-Microservices/modules/locationfeeder/locationfeeder.yaml
-      sleep 60s
-      echo "## Deploying the Application UdaConnect now (3/5): locationingester"
-      kubectl apply -f ./UdaConnect-Refactored-into-Microservices/modules/locationingester/locationingester.yaml
-      sleep 60s
+      sleep 30s
+      #echo "## Deploying the Application UdaConnect now (3/5): locationingester"
+      #kubectl apply -f ./UdaConnect-Refactored-into-Microservices/modules/locationingester/locationingester.yaml
+      #sleep 60s
     SHELL
   end
   # Disable automatic box update checking. If you disable this, then

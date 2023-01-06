@@ -20,6 +20,21 @@ def get_database(url):
     database = create_engine(url, pool_size=50, echo=True)
     return database
 
+# Write location to Postgres-Database
+def write_location(payload, database_connection):
+    person_id = int(payload["userId"])
+    latitude = int(payload["latitude"])
+    longitude = int(payload["longitude"])
+    # inpsired by https://www.compose.com/articles/using-postgresql-through-sqlalchemy/
+    insert_statement = "INSERT INTO location (person_id, coordinate) VALUES ({}, ST_Point({}, {}))".format(person_id, latitude, longitude)
+    database_connection.execute(insert_statement)
+
+# Get rows in table location
+def get_rows_in_location_table(database_connection):
+    get_rows_in_location_statement = "SELECT COUNT(*) FROM location"
+    rows = database_connection.execute(get_rows_in_location_statement)
+    return rows.scalar()
+
 # Function to generate handlers for logging
 def create_logging_handlers():
     # set logger to handle STDOUT and STDERR
@@ -43,28 +58,23 @@ except:
     logging.error("did not connect to database")
     logging.info("did not connect to database")
 
+if database_is_available:
+    connection = database.connect()
+
 for location in consumer:
     logging.info("received {}".format(location.value.decode('utf-8')))
-    print(location.value.decode('utf-8'))
+    payload = json.loads(location.value.decode('utf-8'))
     if database_is_available:
-        with database.connect() as connection:
-            payload = json.loads(location.value.decode('utf-8'))
-            userId = payload["userId"]
-            latitude = payload["latitude"]
-            longitude = payload["longitude"]
-            # inpsired by https://www.compose.com/articles/using-postgresql-through-sqlalchemy/
-            insert_statement = "INSERT INTO location (userId, coordinate) VALUES ({}, ST_Point({}, {}))".format(userId, latitude, longitude)
-            get_rows_in_location_statement = "SELECT COUNT(*) FROM location"
-            try:
-                connection.execute(insert_statement)
-                logging.info("accessing database with statement: {}".format(insert_statement))
-            except:
-                logging.error("could not run statement {}".format(insert_statement))
-                logging.info("could not run statement {}".format(insert_statement))
+        try:
+            write_location(payload, connection)
+            logging.info("added location to database")
+        except:
+            logging.error("could not add location to database")
+            logging.info("could not add location to database")
 
-            try:
-                rows = connection.execute(get_rows_in_location_statement)
-                logging.info("number of rows in location-table is now {}".format(rows))
-            except:
-                logging.error("failed to determine rows in location-table")
-                logging.info("failed to determine rows in location-table")
+        try:
+            rows = get_rows_in_location_table(connection)
+            logging.info("number of rows in location-table is now {}".format(rows)
+        except:
+            logging.error("failed to determine rows in location-table")
+            logging.info("failed to determine rows in location-table")
