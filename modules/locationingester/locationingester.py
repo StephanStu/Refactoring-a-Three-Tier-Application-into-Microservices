@@ -54,9 +54,17 @@ for location in consumer:
             longitude = payload["longitude"]
             # inpsired by https://www.compose.com/articles/using-postgresql-through-sqlalchemy/
             insert_statement = "INSERT INTO location (userId, coordinate) VALUES ({}, ST_Point({}, {}))".format(userId, latitude, longitude)
+            get_rows_in_location_statement = "SELECT COUNT(*) FROM location"
             try:
                 connection.execute(insert_statement)
                 logging.info("accessing database with statement: {}".format(insert_statement))
             except:
                 logging.error("could not run statement {}".format(insert_statement))
                 logging.info("could not run statement {}".format(insert_statement))
+
+            try:
+                rows = connection.execute(get_rows_in_location_statement)
+                logging.info("number of rows in location-table is now {}".format(rows))
+            except:
+                logging.error("failed to determine rows in location-table")
+                logging.info("failed to determine rows in location-table")
