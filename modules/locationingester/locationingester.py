@@ -15,6 +15,7 @@ DB_NAME = os.environ["DB_NAME"]
 def get_database(url):
     if not database_exists(url):
         logging.error("database does not exist or database is not reachable from locationingester.")
+        logging.info("database does not exist or database is not reachable from locationingester.")
 
     database = create_engine(url, pool_size=50, echo=True)
     return database
@@ -40,17 +41,22 @@ try:
 except:
     database_is_available = False
     logging.error("did not connect to database")
+    logging.info("did not connect to database")
 
 for location in consumer:
     logging.info("received {}".format(location.value.decode('utf-8')))
     print(location.value.decode('utf-8'))
     if database_is_available:
-        print("accessing database")
         with database.connect() as connection:
             payload = json.loads(location.value.decode('utf-8'))
             userId = payload["userId"]
             latitude = payload["latitude"]
             longitude = payload["longitude"]
             # inpsired by https://www.compose.com/articles/using-postgresql-through-sqlalchemy/
-            #insert_statement = "INSERT INTO location (userId, coordinate) VALUES ({}, ST_Point({}, {}))".format(userId, latitude, longitude)
-            #connection.execute(insert_statement)
+            insert_statement = "INSERT INTO location (userId, coordinate) VALUES ({}, ST_Point({}, {}))".format(userId, latitude, longitude)
+            try:
+                connection.execute(insert_statement)
+                logging.info("accessing database with statement: {}".format(insert_statement))
+            except:
+                logging.error("could not run statement {}".format(insert_statement))
+                logging.info("could not run statement {}".format(insert_statement))
