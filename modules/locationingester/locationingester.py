@@ -33,16 +33,22 @@ format_output = '%(levelname)s:%(name)s:%(asctime)s, %(message)s'
 logging.basicConfig(format=format_output, level=logging.DEBUG, handlers=create_logging_handlers())
 logging.info("locationingester is consuming topic {} from {}.".format(KAFKA_TOPIC, KAFKA_CONSUMER_URL))
 url = 'postgresql://{user}:{passwd}@{host}:{port}/{db}'.format(user=DB_USERNAME, passwd=DB_PASSWORD, host=DB_HOST, port=DB_PORT, db=DB_NAME)
-database = get_database(url)
-logging.info("connected to database {}".format(url))
+try:
+    database = get_database(url)
+    database_is_available = True
+    logging.info("connected successfully to database")
+except:
+    database_is_available = False
+    logging.error("did not connect to database")
+
 for location in consumer:
     logging.info("received {}".format(location.value.decode('utf-8')))
-    with database.connect() as connection:
-        payload = json.loads(location.value.decode('utf-8'))
-        userId = payload["userId"]
-        latitude = payload["latitude"]
-        longitude = payload["longitude"]
-        # inpsired by https://www.compose.com/articles/using-postgresql-through-sqlalchemy/
-        insert_statement = "INSERT INTO location (userId, coordinate) VALUES ({}, ST_Point({}, {}))" \
-        .format(userId, latitude, longitude)
-        connection.execute(insert_statement)
+    if database_is_available:
+        with database.connect() as connection:
+            payload = json.loads(location.value.decode('utf-8'))
+            userId = payload["userId"]
+            latitude = payload["latitude"]
+            longitude = payload["longitude"]
+            # inpsired by https://www.compose.com/articles/using-postgresql-through-sqlalchemy/
+            #insert_statement = "INSERT INTO location (userId, coordinate) VALUES ({}, ST_Point({}, {}))".format(userId, latitude, longitude)
+            #connection.execute(insert_statement)
