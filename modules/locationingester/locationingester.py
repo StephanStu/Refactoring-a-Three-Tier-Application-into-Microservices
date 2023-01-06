@@ -24,13 +24,13 @@ def create_logging_handlers():
     # set logger to handle STDOUT and STDERR
     stdout_handler =  logging.StreamHandler(stream=sys.stdout) # stdout handler `
     stderr_handler =  logging.StreamHandler(stream=sys.stderr) # stderr handler
-    file_handler = logging.FileHandler(filename='locationfeeder.log')
+    file_handler = logging.FileHandler(filename='locationingester.log')
     handlers = [stderr_handler, stdout_handler, file_handler]
     return handlers
 
 consumer = KafkaConsumer(KAFKA_TOPIC, bootstrap_servers=[KAFKA_CONSUMER_URL])
 format_output = '%(levelname)s:%(name)s:%(asctime)s, %(message)s'
-logging.basicConfig(format=format_output, level=logging.DEBUG, handlers=create_logging_handlers())
+logging.basicConfig(format=format_output, level=logging.INFO, handlers=create_logging_handlers())
 logging.info("locationingester is consuming topic {} from {}.".format(KAFKA_TOPIC, KAFKA_CONSUMER_URL))
 url = 'postgresql://{user}:{passwd}@{host}:{port}/{db}'.format(user=DB_USERNAME, passwd=DB_PASSWORD, host=DB_HOST, port=DB_PORT, db=DB_NAME)
 try:
@@ -43,7 +43,9 @@ except:
 
 for location in consumer:
     logging.info("received {}".format(location.value.decode('utf-8')))
+    print(location.value.decode('utf-8'))
     if database_is_available:
+        print("accessing database")
         with database.connect() as connection:
             payload = json.loads(location.value.decode('utf-8'))
             userId = payload["userId"]
