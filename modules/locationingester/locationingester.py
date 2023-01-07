@@ -74,7 +74,7 @@ for location in consumer:
 
         try:
             rows = get_rows_in_location_table(connection)
-            logging.info("number of rows in location-table is now {}".format(rows)
+            logging.info("number of rows in location-table is now {}".format(rows))
         except:
             logging.error("failed to determine rows in location-table")
             logging.info("failed to determine rows in location-table")
