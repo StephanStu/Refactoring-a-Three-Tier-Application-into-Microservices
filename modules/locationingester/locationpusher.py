@@ -1,5 +1,5 @@
 import json
-import os
+import os, sys
 import logging
 from kafka import KafkaConsumer
 from sqlalchemy import create_engine
