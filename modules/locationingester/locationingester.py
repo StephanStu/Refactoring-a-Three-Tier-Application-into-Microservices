@@ -16,6 +16,7 @@ DB_NAME = os.environ["DB_NAME"]
 def get_database(url):
     if not database_exists(url):
         logging.error("database does not exist or database is not reachable from locationingester.")
+        # Always notify this event in STDOUT
         logging.info("database does not exist or database is not reachable from locationingester.")
 
     database = create_engine(url, pool_size=50, echo=True)
@@ -60,6 +61,7 @@ try:
 except:
     database_is_available = False
     logging.error("did not connect to database")
+    # Always notify this event in STDOUT
     logging.info("did not connect to database")
 
 if database_is_available:
@@ -75,12 +77,14 @@ for location in consumer:
             session.close()
             logging.info("added location to database")
         except:
-            logging.error("could not add location to database")
-            logging.info("could not add location to database")
+            logging.error("could not add location to database - does the user-id exist?")
+            # Always notify this event in STDOUT
+            logging.info("could not add location to database - does the user-id exist?")
 
         try:
             rows = get_rows_in_location_table(connection)
             logging.info("number of rows in location-table is now {}".format(rows))
         except:
             logging.error("failed to determine rows in location-table")
+            # Always notify this event in STDOUT
             logging.info("failed to determine rows in location-table")
