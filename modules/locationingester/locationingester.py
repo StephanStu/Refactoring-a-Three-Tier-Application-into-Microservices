@@ -35,12 +35,17 @@ def write_location(payload, database_connection):
         rows = get_rows_in_person_table_where_userId(database_connection, userId)
         logging.info("userId {} has {} entries in person-table".format(userId, rows))
     except:
+        rows = -1
         logging.error("userId {} has no entries in person-table or query did not run".format(userId, rows))
         # Always notify this event in STDOUT
         logging.error("userId {} has no entries in person-table or query did not run".format(userId, rows))
 
     latitude = int(payload["latitude"])
     longitude = int(payload["longitude"])
+    #
+    # TODO: IF rows == 1 inject into db else logging.error("user does not exist, refusing to inject location")
+    # TODO IF rows < 0 logging.error(could not determine if user exist in db)
+    #
     # inpsired by https://www.compose.com/articles/using-postgresql-through-sqlalchemy/
     insert_statement = "INSERT INTO location (person_id, coordinate) VALUES ({}, ST_Point({}, {}))".format(userId, latitude, longitude)
     database_connection.execute(insert_statement)
