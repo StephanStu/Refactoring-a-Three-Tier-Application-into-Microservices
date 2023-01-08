@@ -1,4 +1,5 @@
 from kafka import KafkaConsumer
+import psycopg2
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists
 import os, sys, json, logging
@@ -21,13 +22,16 @@ def get_database(url):
     return database
 
 # Write location to Postgres-Database
-def write_location(payload, database_connection):
-    person_id = int(payload["userId"])
+def write_location(payload, session):
+    userId = int(payload["userId"])
     latitude = int(payload["latitude"])
     longitude = int(payload["longitude"])
-    # inpsired by https://www.compose.com/articles/using-postgresql-through-sqlalchemy/
-    insert_statement = "INSERT INTO location (person_id, coordinate) VALUES ({}, ST_Point({}, {}))".format(person_id, latitude, longitude)
-    database_connection.execute(insert_statement)
+    insert_statement = "INSERT INTO location (person_id, coordinate) VALUES ({}, ST_Point({}, {}))".format(userId, latitude, longitude)
+    logging.info("using insert statement = {}".format(insert_statement))
+    cursor = session.cursor()
+    cursor.execute(insert_statement)
+    session.commit()
+    cursor.close()
 
 # Get rows in table location
 def get_rows_in_location_table(database_connection):
@@ -66,7 +70,9 @@ for location in consumer:
     payload = json.loads(location.value.decode('utf-8'))
     if database_is_available:
         try:
-            write_location(payload, connection)
+            session = psycopg2.connect(dbname=DB_NAME, port=DB_PORT, user=DB_USERNAME, password=DB_PASSWORD, host=DB_HOST)
+            write_location(payload, session)
+            session.close()
             logging.info("added location to database")
         except:
             logging.error("could not add location to database")
