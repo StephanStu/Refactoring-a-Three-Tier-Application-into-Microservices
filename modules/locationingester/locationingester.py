@@ -24,7 +24,7 @@ def get_database(url):
 
 # Check if there is a row that belongs to user with userId already
 def get_rows_in_person_table_where_userId(database_connection, userId):
-    get_rows_in_location_statement_where_userId = "SELECT COUNT(*) FROM person WHERE person_id = {}".format(userId)
+    get_rows_in_location_statement_where_userId = "SELECT COUNT(*) FROM person WHERE id = {}".format(userId)
     rows = database_connection.execute(get_rows_in_location_statement_where_userId)
     return rows.scalar()
 
