@@ -50,7 +50,7 @@ def create_logging_handlers():
 
 consumer = KafkaConsumer(KAFKA_TOPIC, bootstrap_servers=[KAFKA_CONSUMER_URL])
 format_output = '%(levelname)s:%(name)s:%(asctime)s, %(message)s'
-logging.basicConfig(format=format_output, level=logging.INFO, handlers=create_logging_handlers())
+logging.basicConfig(format=format_output, level=logging.DEBUG, handlers=create_logging_handlers())
 logging.info("locationingester is consuming topic {} from {}.".format(KAFKA_TOPIC, KAFKA_CONSUMER_URL))
 url = 'postgresql://{user}:{passwd}@{host}:{port}/{db}'.format(user=DB_USERNAME, passwd=DB_PASSWORD, host=DB_HOST, port=DB_PORT, db=DB_NAME)
 try:
