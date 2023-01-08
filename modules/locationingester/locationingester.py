@@ -23,8 +23,8 @@ def get_database(url):
     return database
 
 # Check if there is a row that belongs to user with userId already
-def get_rows_in_location_table_where_userId(database_connection, userId):
-    get_rows_in_location_statement_where_userId = "SELECT COUNT(*) FROM location WHERE person_id = {}".format(userId)
+def get_rows_in_person_table_where_userId(database_connection, userId):
+    get_rows_in_location_statement_where_userId = "SELECT COUNT(*) FROM person WHERE person_id = {}".format(userId)
     rows = database_connection.execute(get_rows_in_location_statement_where_userId)
     return rows.scalar()
 
@@ -32,13 +32,13 @@ def get_rows_in_location_table_where_userId(database_connection, userId):
 def write_location(payload, database_connection):
     userId = int(payload["userId"])
     try:
-        rows = get_rows_in_location_table_where_userId(database_connection, userId)
-        logging.info("userId {} has {} entries in database".format(userId, rows))
+        rows = get_rows_in_person_table_where_userId(database_connection, userId)
+        logging.info("userId {} has {} entries in person-table".format(userId, rows))
     except:
-        logging.error("userId {} has no entries in database or query did not run".format(userId, rows))
+        logging.error("userId {} has no entries in person-table or query did not run".format(userId, rows))
         # Always notify this event in STDOUT
-        logging.info("userId {} has no entries in database or query did not run".format(userId, rows))
-            
+        logging.error("userId {} has no entries in person-table or query did not run".format(userId, rows))
+
     latitude = int(payload["latitude"])
     longitude = int(payload["longitude"])
     # inpsired by https://www.compose.com/articles/using-postgresql-through-sqlalchemy/
