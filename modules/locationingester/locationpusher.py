@@ -4,7 +4,7 @@ import logging
 from kafka import KafkaConsumer
 from sqlalchemy import create_engine
 
-TOPIC_NAME = os.environ["KAFKA_TOPIC"]
+KAFKA_TOPIC = os.environ["KAFKA_TOPIC"]
 DB_USERNAME = os.environ["DB_USERNAME"]
 DB_PASSWORD = os.environ["DB_PASSWORD"]
 DB_HOST = os.environ["DB_HOST"]
@@ -12,7 +12,7 @@ DB_PORT = os.environ["DB_PORT"]
 DB_NAME = os.environ["DB_NAME"]
 KAFKA_CONSUMER_URL = os.environ["KAFKA_CONSUMER_URL"]
 
-consumer = KafkaConsumer(TOPIC_NAME, bootstrap_servers=[KAFKA_CONSUMER_URL])
+consumer = KafkaConsumer(KAFKA_TOPIC, bootstrap_servers=[KAFKA_CONSUMER_URL])
 
 # Function to generate handlers for logging
 def create_logging_handlers():
