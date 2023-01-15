@@ -11,7 +11,7 @@ spec:
     targetPort: 5005
     nodePort: 30003
   selector:
-    service: connectionserver-svc
+    service: connectionserver
   type: NodePort
 ---
 apiVersion: apps/v1

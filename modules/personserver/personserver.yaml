@@ -11,7 +11,7 @@ spec:
     targetPort: 5003
     nodePort: 30001
   selector:
-    service: personserver-svc
+    service: personserver
   type: NodePort
 ---
 apiVersion: apps/v1

@@ -11,7 +11,7 @@ spec:
     targetPort: 5004
     nodePort: 30002
   selector:
-    service: locationserver-svc
+    service: locationserver
   type: NodePort
 ---
 apiVersion: apps/v1
