@@ -9,7 +9,7 @@ spec:
   - name: "5005"
     port: 5005
     targetPort: 5005
-    nodePort: 30002
+    nodePort: 30003
   selector:
     service: connectionserver-svc
   type: NodePort
