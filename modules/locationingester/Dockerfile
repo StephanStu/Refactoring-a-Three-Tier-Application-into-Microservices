@@ -6,7 +6,7 @@ WORKDIR /usr/src/locationingester
 COPY ./ ./
 # command(s) to install dependencies
 RUN pip install -r requirements.txt
-# command to expose port 5002
-EXPOSE 5002
+# not necessary to expose port 5002 for this microservice
+# EXPOSE 5002
 # command to run on container start
 CMD [ "python", "locationingester.py" ]
